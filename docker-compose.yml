@@ -1,0 +1,42 @@
+version: '3'
+services:
+    db2:
+        container_name: db2
+        image: mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+        volumes: 
+            - dbdata:/var/lib/mysql
+        networks: 
+            - digitalentbank
+        volumes:
+            - ./digitalent_bank.sql:/appdata/init.sql
+        command: --init-file /appdata/init.sql
+        deploy:
+            replicas: 3
+            restart_policy:
+                max_attempt: 3
+                condition: on-failure
+            update_config:
+                parallelism: 3
+                delay: 10s
+            placement:
+                constraints: [node.role == manager]
+    backend2:
+        container_name: backend2
+        image: mybackend
+        environment:
+            - DB_U=root
+            - DB_P=root
+            - DB_HOST=db2:3306
+            - DB_NAME=digitalent_bank
+        ports:
+            - 8080:8080
+        depends_on:
+            - db2
+        networks: 
+            - digitalentbank
+networks: 
+    digitalentbank:
+volumes: 
+    dbdata:

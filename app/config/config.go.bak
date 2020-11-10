@@ -1,0 +1,20 @@
+package config
+
+//file ini ga jadi dipake
+
+import (
+	"fmt"
+	"p24test/app/model"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+)
+
+func DBInit() *gorm.DB {
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf("root:root@tcp(172.18.0.10:3306)/digitalent_bank")), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect to database" + err.Error())
+	}
+	db.AutoMigrate(new(model.Account), new(model.Transaction))
+	return db
+}
